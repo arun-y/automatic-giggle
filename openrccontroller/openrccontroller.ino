@@ -38,6 +38,7 @@ void setup() {
   Serial.println("Starting Radio");
   radio.begin();
   radio.setChannel(RADIO_CHANNEL);
+  radio.setRetries(3,5); // delay, count
   Serial.println((String) "Channel " + RADIO_CHANNEL);
   radio.setDataRate(RF24_250KBPS);
   radio.openReadingPipe(1, thisSlaveAddress);
@@ -80,12 +81,36 @@ void loop() {
 //    delay(10);
 //  }
 //  delay(500);
-  while(!Serial.available()){}
-  Serial.read();
+
+  getData();
+  showData();
+
   pwm.setPWM(ecspin, 0, 1150);
   Serial.println(1150);
   delay(2000);
   pwm.setPWM(ecspin, 0, 1140);
   delay(2000);
   
+}
+
+
+void getData() {
+    if ( radio.available() ) {
+        radio.read( &joyData, sizeof(joyData));
+        newData = true;
+    }
+}
+
+void showData() {
+    if (newData == true) {
+        Serial.print("Data received ");
+        //Serial.println(dataReceived);
+        Serial.print(joyData[0]);
+        Serial.print(",");
+        Serial.print(joyData[1]);
+        Serial.print(",");
+        Serial.print(joyData[2]);
+        Serial.println("");
+        newData = false;
+    }
 }
